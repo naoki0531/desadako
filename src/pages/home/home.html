@@ -1,14 +1,28 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Ionic Blank
+      でさだこ
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+  <section>
+    <ion-item>
+      <ion-label>Date</ion-label>
+      <ion-input value="{{ time }}"></ion-input>
+    </ion-item>
+    <ion-item class="start">
+      <button ion-button block icon-left large (click)="start()">
+        <ion-icon name="briefcase"></ion-icon>
+        出勤
+      </button>
+    </ion-item>
+    <ion-item class="end">
+      <button ion-button block icon-left large color="secondary" (click)="end()">
+        <ion-icon name="home"></ion-icon>
+        退勤
+      </button>
+    </ion-item>
+  </section>
 </ion-content>
