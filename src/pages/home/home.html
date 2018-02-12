@@ -13,13 +13,13 @@
       <ion-input value="{{ time }}"></ion-input>
     </ion-item>
     <ion-item class="start">
-      <button ion-button block icon-left large (click)="start()">
+      <button ion-button block icon-left large (click)="registerTime(true)">
         <ion-icon name="briefcase"></ion-icon>
         出勤
       </button>
     </ion-item>
     <ion-item class="end">
-      <button ion-button block icon-left large color="secondary" (click)="end()">
+      <button ion-button block icon-left large color="secondary" (click)="registerTime(false)">
         <ion-icon name="home"></ion-icon>
         退勤
       </button>
