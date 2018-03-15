@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Geolocation, GeolocationOptions, PositionError } from '@ionic-native/geolocation';
 import 'rxjs/add/operator/map';
 
 import 'rxjs/add/observable/throw';
@@ -7,7 +8,6 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/catch';
 import { Observable } from 'rxjs/Rx';
 import { RequestItem } from './request_item.ts';
-
 
 /*
   Generated class for the HttpServiceProvider provider.
@@ -18,7 +18,7 @@ import { RequestItem } from './request_item.ts';
 @Injectable()
 export class HttpServiceProvider {
 
-  constructor(public http: HttpClient) {
+  constructor(public http: HttpClient, private geolocation: Geolocation) {
     console.log('Hello HttpServiceProvider Provider');
   }
 
@@ -34,6 +34,16 @@ export class HttpServiceProvider {
 
     console.log("time : ", time);
     console.log("key  : ", key);
+
+    let options: GeolocationOptions = {
+      enableHighAccuracy: this.enableHighAccuracy
+    };
+    this.geolocation.getCurrentPosition(options).then((resp)=> {
+      console.log("lon  : ", resp.coords.longitude);
+      console.log("lat  : ", resp.coords.latitude);
+    }, (err : PositionError) => {
+      console.log("error : ", err.message);
+    });
 
     var url:string = 'http://localhost:3330';
     return this.http.get(url)
