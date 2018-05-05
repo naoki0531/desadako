@@ -4,6 +4,7 @@ import {AlertController} from 'ionic-angular';
 import {QRScanner, QRScannerStatus} from '@ionic-native/qr-scanner';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {HttpClient} from '@angular/common/http';
+import {HttpServiceProvider} from '../../providers/http-service/http-service';
 
 @Component({
     selector: 'page-home',
@@ -12,7 +13,12 @@ import {HttpClient} from '@angular/common/http';
 export class HomePage {
     time: string;
 
-    constructor(public navCtrl: NavController, public alertCtrl: AlertController, private qrScanner: QRScanner, private barcodeScanner: BarcodeScanner, private http: HttpClient) {
+    constructor(public navCtrl: NavController,
+                public alertCtrl: AlertController,
+                private qrScanner: QRScanner,
+                private barcodeScanner: BarcodeScanner,
+                private http: HttpClient,
+                private hsp: HttpServiceProvider) {
         setInterval(function () {
             this.time = this.formatDate(new Date());
         }.bind(this), 1000);
@@ -27,15 +33,13 @@ export class HomePage {
                 return;
             }
 
-            this.http.post('http://localhost:3330', {time: this.time, key: 'testPass'}).subscribe(json => {
+            this.hsp.getHoge(this.time, 'testPass').subscribe(json => {
                 let alert = this.alertCtrl.create({
                     title: title + '<br>' + json,
                     subTitle: this.time,
                     buttons: ['OK']
                 });
                 alert.present();
-            }, (err) => {
-                console.log('Error: ', err);
             });
 
         }, (err) => {
