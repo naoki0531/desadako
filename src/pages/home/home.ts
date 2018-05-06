@@ -1,9 +1,11 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
 import {AlertController} from 'ionic-angular';
-import {QRScanner, QRScannerStatus} from '@ionic-native/qr-scanner';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {HttpClient} from '@angular/common/http';
+
+interface attendancesResult {
+    status: number
+}
 
 @Component({
     selector: 'page-home',
@@ -12,7 +14,7 @@ import {HttpClient} from '@angular/common/http';
 export class HomePage {
     date: Date;
 
-    constructor(public navCtrl: NavController, public alertCtrl: AlertController, private qrScanner: QRScanner, private barcodeScanner: BarcodeScanner, private http: HttpClient) {
+    constructor(public alertCtrl: AlertController, private barcodeScanner: BarcodeScanner, private http: HttpClient) {
         setInterval(function () {
             this.date = new Date();
         }.bind(this), 1000);
@@ -26,11 +28,11 @@ export class HomePage {
         return this.date.getFullYear() + '' + this.zeroPadding(this.date.getMonth() + 1) + '' + this.zeroPadding(this.date.getDate()) + '' + this.zeroPadding(this.date.getHours()) + '' + this.zeroPadding(this.date.getMinutes()) + '' + this.zeroPadding(this.date.getSeconds());
     }
 
-    private zeroPadding(num:number) {
+    private zeroPadding(num: number) {
         return ('00' + num).slice(-2);
     }
 
-    registerTime(isStartTime:boolean) {
+    registerTime(isStartTime: boolean) {
         this.barcodeScanner.scan().then(barcodeData => {
 
             if (barcodeData.cancelled == true) {
@@ -44,7 +46,7 @@ export class HomePage {
         });
     }
 
-    attendances(isStartTime:boolean, uuid:string) {
+    attendances(isStartTime: boolean, uuid: string) {
         const params = {
             account_uuid: uuid,
             time: this.formatDate(),
@@ -53,14 +55,21 @@ export class HomePage {
             type: isStartTime ? 'attending' : 'leaving'
         };
 
-        this.http.post('http://localhost:3000/attendances', params).subscribe(json => {
-            let alert = this.alertCtrl.create({
+        this.http.post<attendancesResult>('http://192.168.10.6:3000/attendances', params).subscribe(data => {
+            const alert = this.alertCtrl.create({
                 title: isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！',
                 subTitle: this.displayDate(),
                 buttons: ['OK']
             });
             alert.present();
-        }, (err) => {
+        }, (err: attendancesResult) => {
+            if (err.status === 409) {
+                const alert = this.alertCtrl.create({
+                    title: '本日は既に打刻済みです。',
+                    buttons: ['OK']
+                });
+                alert.present();
+            }
             console.log('Error: ', err);
         });
     }
