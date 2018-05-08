@@ -7,7 +7,7 @@ import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/catch';
 import { Observable } from 'rxjs/Rx';
-import { RequestItem } from './request_item.ts';
+import { RequestItem } from './request_item';
 
 /*
   Generated class for the HttpServiceProvider provider.
@@ -24,9 +24,6 @@ export class HttpServiceProvider {
 
   private _serverError(err: any) {
     console.log('sever error:', err);
-    if(err instanceof Response) {
-      return Observable.throw(err.json().message || 'データ取得エラー');
-    }
     return Observable.throw(err || 'データ取得エラー');
   }
 
@@ -36,7 +33,7 @@ export class HttpServiceProvider {
     console.log("key  : ", key);
 
     let options: GeolocationOptions = {
-      enableHighAccuracy: this.enableHighAccuracy
+      enableHighAccuracy: false
     };
     this.geolocation.getCurrentPosition(options).then((resp)=> {
       console.log("lon  : ", resp.coords.longitude);
@@ -47,7 +44,7 @@ export class HttpServiceProvider {
 
     var url:string = 'http://localhost:3330';
     return this.http.get(url)
-      .map(res => <Array<QiitaItem>>res.json())
+      .map(res => <Array<RequestItem>>res['results'])
       .do(data => console.log('server data:', data))
       .catch(this._serverError);
   }
