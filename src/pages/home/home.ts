@@ -1,7 +1,8 @@
 import {Component} from '@angular/core';
 import {AlertController} from 'ionic-angular';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {HttpClient} from '@angular/common/http';
+
+import { HttpServiceProvider } from '../../providers/http-service/http-service';
 
 interface attendancesResult {
     status: number
@@ -14,7 +15,7 @@ interface attendancesResult {
 export class HomePage {
     date: Date;
 
-    constructor(public alertCtrl: AlertController, private barcodeScanner: BarcodeScanner, private http: HttpClient) {
+    constructor(public alertCtrl: AlertController, private barcodeScanner: BarcodeScanner, private hsp: HttpServiceProvider) {
         setInterval(function () {
             this.date = new Date();
         }.bind(this), 1000);
@@ -47,21 +48,15 @@ export class HomePage {
     }
 
     attendances(isStartTime: boolean, uuid: string) {
-        const params = {
-            account_uuid: uuid,
-            time: this.formatDate(),
-            latitude: 56.757575,
-            longitude: 139.131313,
-            type: isStartTime ? 'attending' : 'leaving'
-        };
 
-        this.http.post<attendancesResult>('http://192.168.10.6:3000/attendances', params).subscribe(data => {
-            const alert = this.alertCtrl.create({
-                title: isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！',
-                subTitle: this.displayDate(),
-                buttons: ['OK']
+        this.hsp.postData(this.formatDate(), uuid, isStartTime).subscribe(json => {
+            let alert = this.alertCtrl.create({
+              title: isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！',
+              subTitle: this.displayDate(),
+              buttons: ['OK']
             });
             alert.present();
+
         }, (err: attendancesResult) => {
             if (err.status === 409) {
                 const alert = this.alertCtrl.create({

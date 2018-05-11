@@ -12,6 +12,9 @@ import { HomePage } from '../pages/home/home';
 import { NgxQRCodeModule } from 'ngx-qrcode2';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
+import { Geolocation } from '@ionic-native/geolocation';
+import { HttpServiceProvider } from '../providers/http-service/http-service';
+
 @NgModule({
   declarations: [
     MyApp,
@@ -33,7 +36,9 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
     SplashScreen,
     QRScanner,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    BarcodeScanner
+    BarcodeScanner,
+    Geolocation,
+    HttpServiceProvider
   ]
 })
 export class AppModule {}
