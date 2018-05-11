@@ -1,58 +1,76 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
 import {AlertController} from 'ionic-angular';
-import {QRScanner, QRScannerStatus} from '@ionic-native/qr-scanner';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {HttpClient} from '@angular/common/http';
-import {HttpServiceProvider} from '../../providers/http-service/http-service';
+
+interface attendancesResult {
+    status: number
+}
 
 @Component({
     selector: 'page-home',
     templateUrl: 'home.html'
 })
 export class HomePage {
-    time: string;
+    date: Date;
 
-    constructor(public navCtrl: NavController,
-                public alertCtrl: AlertController,
-                private qrScanner: QRScanner,
-                private barcodeScanner: BarcodeScanner,
-                private http: HttpClient,
-                private hsp: HttpServiceProvider) {
+    constructor(public alertCtrl: AlertController, private barcodeScanner: BarcodeScanner, private http: HttpClient) {
         setInterval(function () {
-            this.time = this.formatDate(new Date());
+            this.date = new Date();
         }.bind(this), 1000);
     }
 
-    registerTime(isStartTime) {
-        const title = isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！';
+    displayDate() {
+        return typeof this.date !== 'undefined' ? this.zeroPadding(this.date.getHours()) + ' : ' + this.zeroPadding(this.date.getMinutes()) + ' : ' + this.zeroPadding(this.date.getSeconds()) : '';
+    }
 
+    formatDate() {
+        return this.date.getFullYear() + '' + this.zeroPadding(this.date.getMonth() + 1) + '' + this.zeroPadding(this.date.getDate()) + '' + this.zeroPadding(this.date.getHours()) + '' + this.zeroPadding(this.date.getMinutes()) + '' + this.zeroPadding(this.date.getSeconds());
+    }
+
+    private zeroPadding(num: number) {
+        return ('00' + num).slice(-2);
+    }
+
+    registerTime(isStartTime: boolean) {
         this.barcodeScanner.scan().then(barcodeData => {
 
             if (barcodeData.cancelled == true) {
                 return;
             }
 
-            this.hsp.getHoge(this.time, 'testPass').subscribe(json => {
-                let alert = this.alertCtrl.create({
-                    title: title + '<br>' + json,
-                    subTitle: this.time,
-                    buttons: ['OK']
-                });
-                alert.present();
-            });
+            this.attendances(isStartTime, barcodeData.text);
 
         }, (err) => {
             console.log('Error: ', err);
         });
     }
 
-    formatDate(date) {
-        return this.zeroPadding(date.getHours()) + ' : ' + this.zeroPadding(date.getMinutes()) + ' : ' + this.zeroPadding(date.getSeconds());
-    }
+    attendances(isStartTime: boolean, uuid: string) {
+        const params = {
+            account_uuid: uuid,
+            time: this.formatDate(),
+            latitude: 56.757575,
+            longitude: 139.131313,
+            type: isStartTime ? 'attending' : 'leaving'
+        };
 
-    private zeroPadding(num) {
-        return ('00' + num).slice(-2);
+        this.http.post<attendancesResult>('http://192.168.10.6:3000/attendances', params).subscribe(data => {
+            const alert = this.alertCtrl.create({
+                title: isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！',
+                subTitle: this.displayDate(),
+                buttons: ['OK']
+            });
+            alert.present();
+        }, (err: attendancesResult) => {
+            if (err.status === 409) {
+                const alert = this.alertCtrl.create({
+                    title: '本日は既に打刻済みです。',
+                    buttons: ['OK']
+                });
+                alert.present();
+            }
+            console.log('Error: ', err);
+        });
     }
-
 }
