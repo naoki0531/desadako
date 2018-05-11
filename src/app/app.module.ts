@@ -5,14 +5,12 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { QRScanner } from '@ionic-native/qr-scanner';
 import { HttpClientModule } from '@angular/common/http';
-import { Geolocation, GeolocationOptions } from '@ionic-native/geolocation';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 
 import { NgxQRCodeModule } from 'ngx-qrcode2';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
-import { HttpServiceProvider } from '../providers/http-service/http-service';
 
 @NgModule({
   declarations: [
@@ -35,9 +33,7 @@ import { HttpServiceProvider } from '../providers/http-service/http-service';
     SplashScreen,
     QRScanner,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    BarcodeScanner,
-    HttpServiceProvider,
-    Geolocation,
+    BarcodeScanner
   ]
 })
 export class AppModule {}
