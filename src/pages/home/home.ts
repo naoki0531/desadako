@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {AlertController} from 'ionic-angular';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 interface attendancesResult {
     status: number
@@ -52,10 +52,15 @@ export class HomePage {
             time: this.formatDate(),
             latitude: 56.757575,
             longitude: 139.131313,
-            type: isStartTime ? 'attending' : 'leaving'
+            type: isStartTime ? 'attending' : 'leaving',
+            ACCESS_TOKEN: '7f2392f18ed29aaf1758ea79eb406b82'
         };
 
-        this.http.post<attendancesResult>('http://192.168.10.6:3000/attendances', params).subscribe(data => {
+        const httpOptions = {
+            headers: new HttpHeaders({'Authorization': 'Bearer ACCESS_TOKEN'})
+        };
+
+        this.http.post<attendancesResult>('http://192.168.0.6:3000/attendances', params, httpOptions).subscribe(data => {
             const alert = this.alertCtrl.create({
                 title: isStartTime ? '出勤打刻を行いました！' : '退勤打刻を行いました！',
                 subTitle: this.displayDate(),
